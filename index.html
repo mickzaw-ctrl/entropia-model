@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ENTROPIA — czas jest entropią</title>
+<style>
+  :root {
+    --bg:      #0a0608;
+    --card:    #16101288;
+    --card2:   #1a1214;
+    --border:  #2e2226;
+    --hot:     #e85d4a;
+    --cold:    #4aa3d8;
+    --amber:   #f2b84b;
+    --violet:  #a06bd8;
+    --text:    #f0e8e4;
+    --muted:   #a89a94;
+    --radius:  12px;
+  }
+  * , *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+  }
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* ── HERO ─────────────────────────────────────────────── */
+  .hero { position: relative; overflow: hidden; padding: 110px 24px 84px; text-align: center; }
+  .hero::before {
+    content:'';
+    position:absolute; inset:0;
+    background:
+      radial-gradient(ellipse 70% 55% at 30% -10%, rgba(232,93,74,.22) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 85% 90%, rgba(74,163,216,.15) 0%, transparent 60%);
+    pointer-events:none;
+  }
+  .badge {
+    display:inline-block; padding:5px 16px; border:1px solid var(--hot);
+    border-radius:999px; font-size:12px; color:var(--amber);
+    letter-spacing:.08em; text-transform:uppercase; margin-bottom:26px;
+  }
+  h1 {
+    font-size: clamp(2.1rem, 5vw, 3.6rem); font-weight:800; line-height:1.15;
+    letter-spacing:-.02em; margin-bottom:20px;
+    background: linear-gradient(120deg, var(--hot) 10%, var(--amber) 45%, var(--cold) 90%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .hero p.lead { max-width: 660px; margin: 0 auto 16px; color: var(--muted); font-size:1.08rem; }
+  .hero p.sub  { max-width: 620px; margin: 0 auto 36px; color: var(--muted); font-size:.92rem; }
+  .btn-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .btn {
+    display:inline-flex; align-items:center; gap:8px; padding:12px 24px; border-radius:var(--radius);
+    font-size:.94rem; font-weight:600; text-decoration:none; transition:opacity .15s, transform .15s;
+  }
+  .btn:hover { opacity:.85; transform:translateY(-1px); }
+  .btn-primary { background: var(--hot); color:#1a0806; }
+  .btn-ghost   { border:1px solid var(--border); color:var(--text); background:transparent; }
+
+  /* ── STATS ────────────────────────────────────────────── */
+  .stats { display:flex; justify-content:center; gap:38px; flex-wrap:wrap; padding:8px 24px 56px; border-bottom:1px solid var(--border); }
+  .stat { text-align:center; }
+  .stat-val { font-size:1.85rem; font-weight:800; color: var(--hot); }
+  .stat-lab { font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; }
+
+  section { padding: 70px 0; }
+  section + section { border-top: 1px solid var(--border); }
+  .section-label { font-size:.72rem; color:var(--hot); text-transform:uppercase; letter-spacing:.1em; font-weight:700; margin-bottom:10px; }
+  h2 { font-size: clamp(1.55rem, 3vw, 2.1rem); font-weight:700; margin-bottom:14px; letter-spacing:-.02em; }
+  .section-sub { color:var(--muted); max-width:600px; margin-bottom:44px; font-size:.95rem; }
+
+  /* ── CORE FEATURE CARDS ───────────────────────────────── */
+  .cards { display:grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap:18px; }
+  .card {
+    background: var(--card2); border:1px solid var(--border); border-radius:var(--radius);
+    padding:24px 22px; position:relative; overflow:hidden; transition: border-color .2s, transform .2s;
+  }
+  .card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background: var(--card-accent, var(--hot)); }
+  .card:hover { border-color: var(--amber); transform: translateY(-3px); }
+  .card .num { font-size:.72rem; color:var(--muted); font-weight:700; letter-spacing:.08em; margin-bottom:10px; }
+  .card h3 { font-size:1rem; font-weight:700; margin-bottom:8px; }
+  .card p { font-size:.85rem; color:var(--muted); }
+  .card .result { display:inline-block; margin-top:10px; font-family:monospace; font-size:.82rem; color:var(--amber); background: rgba(242,184,75,.08); padding:3px 8px; border-radius:6px; }
+
+  /* ── EQUATIONS ────────────────────────────────────────── */
+  .eq-grid { display:grid; grid-template-columns: 1fr 1fr; gap:18px; }
+  @media (max-width:640px){ .eq-grid { grid-template-columns:1fr; } }
+  .eq-box { background: var(--card2); border:1px solid var(--border); border-radius:var(--radius); padding:22px; }
+  .eq-box h4 { font-size:.82rem; color:var(--cold); margin-bottom:10px; font-weight:600; letter-spacing:.03em; }
+  .eq-box pre { font-family:'JetBrains Mono','Fira Code','Courier New',monospace; font-size:.8rem; color:#e8c98f; line-height:1.7; white-space:pre-wrap; }
+
+  /* ── EXTENSIONS TIMELINE ──────────────────────────────── */
+  .ext-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap:14px; }
+  .ext-item {
+    background: var(--card2); border:1px solid var(--border); border-radius:10px; padding:16px 18px;
+  }
+  .ext-item .tag { font-family:monospace; font-size:.75rem; color:var(--hot); font-weight:700; }
+  .ext-item .desc { font-size:.83rem; color:var(--muted); margin-top:4px; }
+
+  /* ── PREDICTIONS TABLE ────────────────────────────────── */
+  .pred-list { display:flex; flex-direction:column; gap:10px; }
+  .pred-item { display:flex; gap:14px; align-items:flex-start; background:var(--card2); border:1px solid var(--border); border-radius:var(--radius); padding:16px 20px; }
+  .pred-mark { font-size:1.1rem; flex-shrink:0; margin-top:1px; }
+  .pred-title { font-weight:700; font-size:.92rem; }
+  .pred-desc { font-size:.83rem; color:var(--muted); margin-top:3px; }
+
+  /* ── FIGURE GALLERY ───────────────────────────────────── */
+  .gallery { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:16px; }
+  .gal-item { background: var(--card2); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+  .gal-item img { width:100%; display:block; background:#fff; }
+  .gal-cap { padding:12px 16px; font-size:.8rem; color:var(--muted); }
+
+  /* ── TECH / STRUCTURE ─────────────────────────────────── */
+  .tech-grid { display:flex; flex-wrap:wrap; gap:12px; }
+  .tech-pill { display:flex; align-items:center; gap:8px; background:var(--card2); border:1px solid var(--border); border-radius:999px; padding:8px 18px; font-size:.85rem; font-weight:600; }
+  .tech-dot { width:8px; height:8px; border-radius:50%; }
+
+  footer { border-top:1px solid var(--border); padding:40px 24px; text-align:center; color:var(--muted); font-size:.85rem; }
+  footer a { color: var(--cold); text-decoration:none; }
+  footer a:hover { text-decoration:underline; }
+
+  code { font-family: monospace; background: rgba(255,255,255,.06); padding: 1px 5px; border-radius: 4px; font-size: .85em; }
+</style>
+</head>
+<body>
+
+<!-- ══ HERO ══════════════════════════════════════════════════════════════ -->
+<div class="hero">
+  <div class="badge">Model kosmologiczny · v5.0.0</div>
+  <h1>ENTROPIA</h1>
+  <p class="lead">Czas jest entropią. Tyknięcia są dyskretne. Czas potrafi „czkać”.</p>
+  <p class="sub">
+    Kosmologiczny model łączący mechanikę kwantową układów otwartych (równanie
+    Lindblada dla kubitu w kąpieli termicznej) z relacyjną koncepcją czasu:
+    zegar kosmiczny nie mierzy upływu zewnętrznego czasu, lecz kumuluje
+    produkowaną entropię.
+  </p>
+  <div class="btn-row">
+    <a class="btn btn-primary" href="https://github.com/mickzaw-ctrl/entropia-model">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57
+        0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695
+        -.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305
+        3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385
+        1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405
+        3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12
+        3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81
+        1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0
+        24 12c0-6.63-5.37-12-12-12z"/>
+      </svg>
+      Zobacz na GitHubie
+    </a>
+    <a class="btn btn-ghost" href="https://github.com/mickzaw-ctrl/entropia-model/blob/main/MANUSKRYPT.md">Manuskrypt</a>
+    <a class="btn btn-ghost" href="https://github.com/mickzaw-ctrl/entropia-model/blob/main/PREDYKCJE.md">Predykcje</a>
+  </div>
+</div>
+
+<!-- ══ STATS ══════════════════════════════════════════════════════════════ -->
+<div class="stats">
+  <div class="stat"><div class="stat-val">27×</div><div class="stat-lab">Kompresja czasu</div></div>
+  <div class="stat"><div class="stat-val">R1–R50</div><div class="stat-lab">Rozszerzenia</div></div>
+  <div class="stat"><div class="stat-val">0 → ln2</div><div class="stat-lab">Wzrost entropii</div></div>
+  <div class="stat"><div class="stat-val">61</div><div class="stat-lab">Wygenerowanych figur</div></div>
+  <div class="stat"><div class="stat-val">19</div><div class="stat-lab">Modułów pytest</div></div>
+  <div class="stat"><div class="stat-val">12</div><div class="stat-lab">Predykcji obserwacyjnych</div></div>
+</div>
+
+<!-- ══ CORE 7 FEATURES ═══════════════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Rdzeń modelu</div>
+    <h2>Siedem cech</h2>
+    <p class="section-sub">Kubit w kąpieli termicznej Lindblada — z jednego mechanizmu wynika siedem obserwowalnych zjawisk.</p>
+
+    <div class="cards">
+      <div class="card" style="--card-accent:#e85d4a">
+        <div class="num">01</div>
+        <h3>Entropia S(ρ)</h3>
+        <p>Monotoniczny wzrost dzięki mapie unitalnej (tw. Ando–Lindblada); produkcja entropii σ ≥ 0 (tw. Spohna).</p>
+        <div class="result">0 → ln 2</div>
+      </div>
+      <div class="card" style="--card-accent:#f2b84b">
+        <div class="num">02</div>
+        <h3>ΔS_n na tyknięcie</h3>
+        <p>A produkuje entropię szybciej niż B — temperatura ustawia tempo, nie cel. s ∝ T³.</p>
+        <div class="result">27× (T_A = 3·T_B)</div>
+      </div>
+      <div class="card" style="--card-accent:#a06bd8">
+        <div class="num">03</div>
+        <h3>Skumulowany czas</h3>
+        <p>Czas kosmologiczny jest sumą przyrostów entropii — nie jest postulatem, lecz wynikiem.</p>
+        <div class="result">T(n) = S(n), κ = 1</div>
+      </div>
+      <div class="card" style="--card-accent:#4aa3d8">
+        <div class="num">04</div>
+        <h3>Dyskretne tyknięcia</h3>
+        <p>Czas kwantowany w „bitach” δs — jawne schodki, nie ciągły przepływ.</p>
+        <div class="result">k_n ~ Poisson(ΔS_n/δs)</div>
+      </div>
+      <div class="card" style="--card-accent:#e85d4a">
+        <div class="num">05</div>
+        <h3>„Czkanie czasu”</h3>
+        <p>Przy niskiej produkcji entropii Δt_n → 0 — długie zamrożenia, potem skok.</p>
+        <div class="result">151/160 zer w ogonie (B)</div>
+      </div>
+      <div class="card" style="--card-accent:#f2b84b">
+        <div class="num">06</div>
+        <h3>T_A/T_B</h3>
+        <p>Czas w gorącym otoczeniu płynie szybciej; w granicy ciągłej t→0 stosunek jest dokładny.</p>
+        <div class="result">→ 27 (ciągła granica)</div>
+      </div>
+      <div class="card" style="--card-accent:#a06bd8">
+        <div class="num">07</div>
+        <h3>Dekoherencja i Bloch</h3>
+        <p>Czystość Tr(ρ²) i długość wektora Blocha |r| zanikają wraz z termalizacją.</p>
+        <div class="result">Tr(ρ²): 1→0.5 · |r|: 1→0</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ EQUATIONS ══════════════════════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Aparat matematyczny</div>
+    <h2>Kluczowe równania</h2>
+    <p class="section-sub">Mikrofizyka: równanie Lindblada dla kubitu w kąpieli. Makrofizyka: zegar kosmiczny zbudowany z przyrostów entropii.</p>
+
+    <div class="eq-grid">
+      <div class="eq-box">
+        <h4>Równanie Lindblada</h4>
+        <pre>dρ/dt = −i[H,ρ] + Σ_k ( L_k ρ L_k†
+         − ½{L_k†L_k, ρ} )
+
+ρ_n = e^(ℒτ) ρ_(n−1)   (mikro-tyknięcie τ)</pre>
+      </div>
+      <div class="eq-box">
+        <h4>Produkcja entropii (tw. Spohna)</h4>
+        <pre>σ = −d/dt S(ρ‖ρ_eq) ≥ 0
+
+ΔS_n = S(ρ_n) − S(ρ_(n−1))
+T(n) = Σ_k Δt_k,   Δt_n = κ·ΔS_n</pre>
+      </div>
+      <div class="eq-box">
+        <h4>Kompresja czasu 27×</h4>
+        <pre>s ∝ T³   (entropia właściwa promieniowania)
+γ_A/γ_B = (T_A/T_B)³
+
+T_A = 3·T_B  ⟹  γ_A = 27·γ_B</pre>
+      </div>
+      <div class="eq-box">
+        <h4>Czkanie czasu (kwantyzacja)</h4>
+        <pre>δs — kwant entropii („bit")
+k_n ~ Poisson(ΔS_n/δs)
+Δt_n = k_n · δs
+
+ΔS_n mały ⟹ P(k_n=0) wysokie ⟹ Δt_n=0</pre>
+      </div>
+      <div class="eq-box">
+        <h4>Kąpiel skończonej temperatury (R1)</h4>
+        <pre>η = e^(−βΩ)
+a = 2γ/(1+η)   (emisja)
+b = 2γη/(1+η)  (absorpcja)
+
+S(∞) = H(1/(1+η)) < ln 2</pre>
+      </div>
+      <div class="eq-box">
+        <h4>Relacja Koide-podobna — mapa Petza</h4>
+        <pre>Odzyskiwalność informacji:
+ℛ_σ(X) = σ^(1/2) E*(E(σ)^(−1/2) X E(σ)^(−1/2)) σ^(1/2)
+
+Dowód formalny: PETZ_DOWOD.md</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ EXTENSIONS ═════════════════════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Program rozszerzeń</div>
+    <h2>R1 – R50 + ENTROPIA-1.1…1.9</h2>
+    <p class="section-sub">Model rozwijany w trzech osiach: termodynamika, wiele ciał, kosmologia — plus dziewięć iteracji ENTROPIA-1.x (kwantowy zegar, odzyskiwalność, koszt fizyczny, program eksperymentalny).</p>
+
+    <div class="ext-grid">
+      <div class="ext-item"><div class="tag">R1</div><div class="desc">Skończona temperatura kąpieli — nasycenie poniżej ln 2, kompresja 27× przetrwa</div></div>
+      <div class="ext-item"><div class="tag">R2</div><div class="desc">Wiele kubitów — niezależne vs kolektywna kąpiel Dicke, ciemny singlet Bella</div></div>
+      <div class="ext-item"><div class="tag">R3</div><div class="desc">Sprzężenie „zegar → tempo” — chłodzenie i przyspieszanie bez utraty 27×</div></div>
+      <div class="ext-item"><div class="tag">R4</div><div class="desc">N=3, sektory j=3/2 ⊕ 2×j=1/2 — stany subradiantne, „czapka” j=1/2</div></div>
+      <div class="ext-item"><div class="tag">R5</div><div class="desc">Pełna entropia makro — ekstensywność N·ln2 vs superradiancja ln(N+1)</div></div>
+      <div class="ext-item"><div class="tag">R6</div><div class="desc">Gorący Wielki Wybuch jako warunek startowy — zegar biegnie wstecz</div></div>
+      <div class="ext-item"><div class="tag">R7</div><div class="desc">Kąpiel kolektywna dla losowych stanów — entropia blokowana w koherencjach</div></div>
+      <div class="ext-item"><div class="tag">R8</div><div class="desc">Cykl Wybuch → ekspansja → kolaps — czas dwustronny, wszechświat jako pętla</div></div>
+      <div class="ext-item"><div class="tag">R9</div><div class="desc">Kwantowy zegar (super-twardy) — czas jako operator, Δn/⟨n⟩ się wyostrza</div></div>
+      <div class="ext-item"><div class="tag">R10</div><div class="desc">Zegar z koherencjami — start koherentny, faza czasu, dekoherencja zegara</div></div>
+      <div class="ext-item"><div class="tag">R11</div><div class="desc">Prawo τ₉₀ ∝ 1/γ_φ — czas potrzebuje dekoherencji do pełnej termalizacji</div></div>
+      <div class="ext-item"><div class="tag">R12</div><div class="desc">Wielka synteza R1–R12 — trzy osie rozwoju, jeden zegar T(n)=S(n)</div></div>
+      <div class="ext-item"><div class="tag">R13</div><div class="desc">Grawitacyjna produkcja entropii — dwie kąpiele, NESS, czas nigdy nie zamiera</div></div>
+      <div class="ext-item"><div class="tag">R14</div><div class="desc">Predykcje modelu vs dane obserwacyjne — 12 testów, BBN/CMB, N_eff</div></div>
+      <div class="ext-item"><div class="tag">R15–R50</div><div class="desc">Strażnik decoherencji, testy relacyjne, gravitational entrainment, hardware, tomografia — zob. MANUSKRYPT.md</div></div>
+      <div class="ext-item"><div class="tag">1.1–1.9</div><div class="desc">Dicke N=2…100, funkcjonały czasu T0–T3, mapa Petza, koszt energetyczny zegara ΔE·Δτ≥ħ/2, protokół eksperymentalny</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PREDICTIONS ════════════════════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Falsyfikowalność</div>
+    <h2>Predykcje a dane obserwacyjne</h2>
+    <p class="section-sub">Model jest fenomenologiczną zabawką, ale zbudowaną na prawdziwym prawie: s ∝ T³. Poniżej kluczowe testy z <code>PREDYKCJE.md</code>.</p>
+
+    <div class="pred-list">
+      <div class="pred-item">
+        <div class="pred-mark">✅</div>
+        <div>
+          <div class="pred-title">P1 — s ∝ T³: entropia promieniowania skaluje się jak T³</div>
+          <div class="pred-desc">T_ν/T_γ = (4/11)^(1/3) = 0.7138, N_eff = 2.99 ± 0.17 (Planck 2018) — zgodność ilościowa. Najsilniejszy test: mechanizm modelu to mechanizm realnej kosmologii.</div>
+        </div>
+      </div>
+      <div class="pred-item">
+        <div class="pred-mark">✅</div>
+        <div>
+          <div class="pred-title">P2 — Strzałka czasu = wzrost entropii</div>
+          <div class="pred-desc">S(ρ) rośnie monotonicznie 0 → ln2 (tw. Ando–Lindblada) — kierunek zgadza się z drugą zasadą termodynamiki.</div>
+        </div>
+      </div>
+      <div class="pred-item">
+        <div class="pred-mark">🟡</div>
+        <div>
+          <div class="pred-title">P3 — „Zegar entropii”: wiek kosmiczny ∝ wyprodukowana entropia</div>
+          <div class="pred-desc">Egan & Lineweaver 2010: S_obs = 3.1×10¹⁰⁴ k_B, wskazówka zegara ≈ 1.2×10⁻¹⁸ — jakościowa zgodność, Wszechświat daleki od równowagi.</div>
+        </div>
+      </div>
+      <div class="pred-item">
+        <div class="pred-mark">✅</div>
+        <div>
+          <div class="pred-title">P7 — Subradiancja: eksperymentalnie zmierzona w zimnych atomach</div>
+          <div class="pred-desc">PRL 116, 083601; PRL 128, 203601 — analogia do „ciemnej" entropii sektorów w modelu (R2 |10⟩: 50% entropii ukryta).</div>
+        </div>
+      </div>
+      <div class="pred-item">
+        <div class="pred-mark">❓</div>
+        <div>
+          <div class="pred-title">Test rozstrzygający T1 vs T2 — protokół R23</div>
+          <div class="pred-desc">Zimne atomy ⁸⁷Rb / ¹³³Cs / wnęka optyczna — pomiar informacji wzajemnej I(A:B) w fazie ciemnej rozstrzyga, czy zegar staje po wygaśnięciu fluorescencji. Pełny arkusz: <code>EKSPERYMENT.md</code>.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FIGURE GALLERY ═════════════════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Wizualizacje</div>
+    <h2>Wybrane figury z 61 wygenerowanych</h2>
+    <p class="section-sub">Pełny zestaw w <code>figury/</code>, interaktywny raport w <code>raport.html</code>.</p>
+
+    <div class="gallery">
+      <div class="gal-item">
+        <img src="assets/fig1_entropia.png" alt="Entropia S(rho) 0 do ln2" loading="lazy" />
+        <div class="gal-cap">Fig. 1 — Wzrost entropii S(ρ): 0 → ln 2</div>
+      </div>
+      <div class="gal-item">
+        <img src="assets/fig3_czas_entropia.png" alt="Czas jako entropia" loading="lazy" />
+        <div class="gal-cap">Fig. 3 — Skumulowany czas T(n) = S(n)</div>
+      </div>
+      <div class="gal-item">
+        <img src="assets/fig4_czkanie.png" alt="Czkanie czasu" loading="lazy" />
+        <div class="gal-cap">Fig. 4 — „Czkanie czasu”: dyskretne zamrożenia</div>
+      </div>
+      <div class="gal-item">
+        <img src="assets/fig7_bloch.png" alt="Wektor Blocha" loading="lazy" />
+        <div class="gal-cap">Fig. 7 — Zanik wektora Blocha |r|: 1 → 0</div>
+      </div>
+      <div class="gal-item">
+        <img src="assets/figR6_wielkiwybuch.png" alt="Gorący Wielki Wybuch" loading="lazy" />
+        <div class="gal-cap">Fig. R6 — Gorący Wielki Wybuch jako warunek startowy</div>
+      </div>
+      <div class="gal-item">
+        <img src="assets/figR9_zegarkwantowy.png" alt="Kwantowy zegar" loading="lazy" />
+        <div class="gal-cap">Fig. R9 — Kwantowy zegar: czas jako operator</div>
+      </div>
+      <div class="gal-item">
+        <img src="assets/figE18_petz.png" alt="Mapa Petza" loading="lazy" />
+        <div class="gal-cap">Fig. E18 — Odzyskiwalność informacji: mapa Petza</div>
+      </div>
+      <div class="gal-item">
+        <img src="assets/fig6_dekoherencja.png" alt="Dekoherencja" loading="lazy" />
+        <div class="gal-cap">Fig. 6 — Dekoherencja: Tr(ρ²) 1 → 0.5</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TECH / STRUCTURE ═══════════════════════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-label">Implementacja</div>
+    <h2>Pakiet Python</h2>
+    <p class="section-sub">Pakietowany jako <code>model-entropia</code> v5.0.0, testowany pytest, 25 modułów rozszerzeń.</p>
+    <div class="tech-grid">
+      <div class="tech-pill"><div class="tech-dot" style="background:#e85d4a"></div>Python ≥3.10</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#f2b84b"></div>NumPy ≥1.24</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#4aa3d8"></div>SciPy ≥1.10</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#a06bd8"></div>Matplotlib ≥3.7</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#f0e8e4"></div>pytest ≥7</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#e85d4a"></div>Równanie Lindblada</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#4aa3d8"></div>Baza Dickego</div>
+      <div class="tech-pill"><div class="tech-dot" style="background:#a06bd8"></div>Mapa Petza</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ═════════════════════════════════════════════════════════════ -->
+<footer>
+  <div><strong>ENTROPIA v5.0.0</strong> — kosmologiczny model czasu jako entropii</div>
+  <div style="margin-top:8px">
+    <a href="https://github.com/mickzaw-ctrl/entropia-model">GitHub</a> ·
+    <a href="https://github.com/mickzaw-ctrl/entropia-model/blob/main/README.md">README</a> ·
+    <a href="https://github.com/mickzaw-ctrl/entropia-model/blob/main/MANUSKRYPT.md">Manuskrypt</a> ·
+    <a href="https://github.com/mickzaw-ctrl/entropia-model/blob/main/PETZ_DOWOD.md">Dowód Petza</a>
+  </div>
+</footer>
+
+</body>
+</html>
