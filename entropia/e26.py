@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 =============================================================================
-  ENTROPIA-6.0/6.1 — KOSMOLOGICZNA KALIBRACJA ZEGARA (R51-R52):
+  ENTROPIA-6.0/6.1/6.2 — KOSMOLOGICZNA KALIBRACJA ZEGARA (R51-R53):
                  ZAPIS POMIARU JAKO JEDNOSTKA CZASU
 =============================================================================
   Rdzeń modelu (core.py) definiuje: Δt_n = κ·ΔS_n — czas JEST entropią,
@@ -90,6 +90,42 @@
   ale same S_dS (entropia maksymalna horyzontu) jest od nich obu wieksza
   o kolejne ~18 rzedow wielkosci.
 
+  R53 — KIEDY ENTROPIA WSZECHSWIATA ZRÓWNA SIE Z HORYZONTEM (S_dS)?
+  Trzy niezalezne modele daja DRAMATYCZNIE rozne odpowiedzi:
+
+    MODEL A (nasz, ENTROPIA/R51 — naiwne tempo minimalne):
+      zakladajac, ze KAZDY nastepny bit entropii kosztuje co najmniej
+      τ_rec (granica Margolus-Levitin @ T_dS, R51), czas do zapelnienia
+      horyzontu: t_A = (S_dS − S_now)·τ_rec ≈ S_dS·τ_rec (S_now znikoma).
+      WYNIK: t_A ≈ 8.09×10¹³³ lat (10^133.9).
+
+    MODEL B (Dyson, Kleban, Susskind 2002, "Disturbing Implications of a
+      Cosmological Constant", JHEP 0210:011 — rekurencja Poincarego):
+      prawdziwa fizyka kwantowa: przestrzen de Sittera jest UKLADEM
+      TERMICZNYM o skoncznej entropii S_dS -> pelna termalizacja / powrot
+      Poincarego wymaga t_rec ~ exp(S_dS) (w jednostkach Plancka).
+      WYNIK: t_rec ~ 10^(1.42×10¹²²) lat — liczba, ktorej WYKLADNIK sam
+      jest rzedu S_dS. Nieporownywalnie wieksza niz Model A.
+
+    MODEL C (astrofizyka, literatura — Page 1976, Adams & Laughlin 1997):
+      najwieksze znane/mozliwe czarne dziury (~10¹¹ M☉, np. Ton 618)
+      odparowuja przez promieniowanie Hawkinga w t ≈ 2.1×10¹⁰⁰ lat;
+      "Era Czarnych Dziur" trwa ~10⁴⁰–10¹⁰⁰ lat, potem zaczyna sie
+      "Era Ciemna" (~10¹⁰¹ lat i dalej) — ale entropia PROMIENIOWANIA
+      z odparowanych czarnych dziur jest wciaz DUZO mniejsza niz S_dS
+      (bo max. entropia BH ograniczonej horyzontem Hubble'a << S_dS).
+
+  WNIOSEK (uczciwa uwaga R53):
+    Model A (nasz, "naiwny min-tick") i Model C (odparowanie SMBH) dają
+    "tylko" 10¹⁰⁰–10¹³³ lat — gigantyczne, ale FINITE numery. Model B
+    (prawdziwa QFT w zakrzywionej czasoprzestrzeni, rekurencja Poincarego)
+    daje liczbę, ktorej WYKLADNIK dziesietny ma 123 cyfry — nasz wlasny
+    model R51 NIE dociera nawet blisko prawdziwej skali termalizacji.
+    To pokazuje ograniczenie modelu-zabawki ENTROPIA: zaniza prawdziwy
+    czas relaksacji o ~10¹²² rzedow wielkosci, bo liczy tylko LINIOWA
+    akumulacje bitow w najwolniejszym tempie, a nie PRAWDZIWA dynamike
+    kwantowych fluktuacji vacuum de Sittera.
+
   Uruchomienie:  python3 -m entropia.e26
   Wymagania:     numpy, matplotlib
 =============================================================================
@@ -132,6 +168,9 @@ AGE_UNIVERSE_GYR = 13.8      # mld lat, wiek Wszechświata
 # R52 — entropia obecna Wszechświata (nats, jednostki k_B) — literatura
 S_NOW_CMB_NATS  = 2.0e89     # tylko fotony CMB (rzad wielkosci)
 S_NOW_EGAN_NATS = 3.1e104    # Egan & Lineweaver 2010 (SMBH-dominowana)
+
+# R53 — czasy z literatury (lata)
+T_SMBH_EVAP_YR = 2.1e100     # odparowanie najwiekszej SMBH (~1e11 Msun), Page 1976
 
 
 def dlugosc_plancka():
@@ -228,6 +267,39 @@ def procent_horyzontu_zapisany(S_now_nats, Lam=LAMBDA_PLANCK2018):
                 rzedy_wielkosci_do_zapelnienia=np.log10(S_dS / S_now_bity))
 
 
+def czas_do_zrownania_model_a(Lam=LAMBDA_PLANCK2018, S_now_nats=S_NOW_EGAN_NATS):
+    """R53 Model A — naiwne tempo minimalne (kazdy nastepny bit kosztuje
+    co najmniej tau_rec, granica Margolus-Levitin @ T_dS, R51).
+    t_A = (S_dS - S_now)*tau_rec  [s]. Zwraca sekundy, lata i log10(lata)."""
+    T_dS = temperatura_gibbons_hawking(Lam)
+    tau_rec = czas_zapisu_bitu_ml(T_dS)
+    S_dS = entropia_horyzontu_bity(Lam)
+    S_now_bity = S_now_nats / LN2
+    delta_bity = S_dS - S_now_bity
+    t_s = delta_bity * tau_rec
+    t_yr = t_s / S_PER_YEAR
+    return dict(t_s=t_s, t_yr=t_yr, log10_t_yr=np.log10(t_yr),
+                S_dS_bity=S_dS, S_now_bity=S_now_bity, tau_rec=tau_rec)
+
+
+def czas_do_zrownania_model_b_poincare(Lam=LAMBDA_PLANCK2018):
+    """R53 Model B — rekurencja Poincarego (Dyson, Kleban, Susskind 2002,
+    JHEP 0210:011): t_rec ~ exp(S_dS) w jednostkach Plancka. Zwraca
+    log10(t_rec w latach) — liczba jest za duza by przechowac ja jawnie."""
+    S_dS_nats = entropia_horyzontu_bity(Lam) * LN2
+    log10_e = np.log10(np.e)
+    log10_t_yr = S_dS_nats * log10_e   # korekty Plancka znikoma wobec ~1e122
+    return dict(S_dS_nats=S_dS_nats, log10_t_yr=log10_t_yr)
+
+
+def czas_do_zrownania_model_c_smbh():
+    """R53 Model C — odparowanie najwiekszej znanej/mozliwej SMBH
+    (~1e11 M_sun, np. Ton 618) przez promieniowanie Hawkinga, Page 1976 /
+    Adams & Laughlin 1997. Wartosc literaturowa, nie wyprowadzona tutaj."""
+    return dict(t_yr=T_SMBH_EVAP_YR, log10_t_yr=np.log10(T_SMBH_EVAP_YR))
+
+
+
 def figura_51(wynik_planck, wynik_desi):
     """Wykres: porównanie kluczowych skal czasowych R51 (log)."""
     fig, ax = plt.subplots(figsize=(7.5, 4.8))
@@ -265,6 +337,29 @@ def figura_52(wynik_cmb, wynik_egan):
                     textcoords="offset points", xytext=(0, 6), ha="center", fontsize=9)
     fig.tight_layout()
     path = os.path.join(OUT, "figE45_procent_horyzontu.png")
+    fig.savefig(path)
+    plt.close(fig)
+    return path
+
+
+def figura_53(a, c, wiek_dzis_yr=AGE_UNIVERSE_GYR * 1e9):
+    """Wykres: log10(czas w latach) dla Modelu A (ENTROPIA min-tick) i
+    Modelu C (odparowanie SMBH) vs wiek dzisiejszy. Model B (Poincare,
+    10^(1.4e122) lat) jest za duzy by pokazac na tej samej osi liniowej —
+    opisany tekstowo na wykresie."""
+    fig, ax = plt.subplots(figsize=(8, 4.8))
+    labels = ["wiek Wszechświata\ndziś", "Model C\n(odparowanie SMBH)", "Model A\n(ENTROPIA min-tick, R51)"]
+    vals_log10 = [np.log10(wiek_dzis_yr), c["log10_t_yr"], a["log10_t_yr"]]
+    bars = ax.bar(labels, vals_log10, color=["#5a7a9a", "#00d4ff", "#7b2fff"])
+    ax.set_ylabel("log₁₀(czas) [lata]")
+    ax.set_title("R53 — Kiedy entropia zrówna się z horyzontem de Sittera?")
+    for b, v in zip(bars, vals_log10):
+        ax.annotate(f"10^{v:.1f}", (b.get_x() + b.get_width() / 2, v),
+                    textcoords="offset points", xytext=(0, 6), ha="center", fontsize=9)
+    ax.text(0.5, 0.92, "Model B (Poincaré, Dyson-Kleban-Susskind): ~10^(1.4×10¹²²) lat — poza skalą",
+            transform=ax.transAxes, ha="center", fontsize=8.5, style="italic", color="#5a7a9a")
+    fig.tight_layout()
+    path = os.path.join(OUT, "figE46_zrownanie_horyzontu.png")
     fig.savefig(path)
     plt.close(fig)
     return path
@@ -310,14 +405,30 @@ def main():
     print(f"  brakuje ~{w_egan['rzedy_wielkosci_do_zapelnienia']:.1f} rzedow "
           f"wielkosci do zapelnienia horyzontu (wg Egana-Lineweavera)")
 
+
+    print(f"\n[R53 — kiedy entropia zrowna sie z horyzontem S_dS?]")
+    a = czas_do_zrownania_model_a()
+    b = czas_do_zrownania_model_b_poincare()
+    c = czas_do_zrownania_model_c_smbh()
+    print(f"  Model A (ENTROPIA min-tick, tau_rec z R51): "
+          f"{a['t_yr']:.3e} lat  (10^{a['log10_t_yr']:.1f})")
+    print(f"  Model B (Poincare, Dyson-Kleban-Susskind 2002): "
+          f"~10^({b['log10_t_yr']:.3e}) lat  (wykladnik ma ~123 cyfry)")
+    print(f"  Model C (odparowanie najwiekszej SMBH, Page 1976): "
+          f"{c['t_yr']:.3e} lat  (10^{c['log10_t_yr']:.1f})")
+    print(f"  Model A / wiek dzis (13.8 mld lat): 10^{a['log10_t_yr']-10.14:.1f}x")
+
     w_planck = kalibracja_kosmologiczna(LAMBDA_PLANCK2018)
     w_desi = kalibracja_kosmologiczna(LAMBDA_DESI2024)
     path = figura_51(w_planck, w_desi)
     path52 = figura_52(w_cmb, w_egan)
+    path53 = figura_53(a, c)
     print(f"\nFigura R51: {path}")
     print(f"Figura R52: {path52}")
+    print(f"Figura R53: {path53}")
     return dict(planck=w_planck, desi=w_desi, falsyfikacja=fals,
-                procent_cmb=w_cmb, procent_egan=w_egan)
+                procent_cmb=w_cmb, procent_egan=w_egan,
+                zrownanie_a=a, zrownanie_b=b, zrownanie_c=c)
 
 
 if __name__ == "__main__":
