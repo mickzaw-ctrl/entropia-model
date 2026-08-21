@@ -133,3 +133,47 @@ def test_figura_52_generuje_plik():
     w_egan = E.procent_horyzontu_zapisany(E.S_NOW_EGAN_NATS)
     path = E.figura_52(w_cmb, w_egan)
     assert os.path.exists(path)
+
+
+# =============================================================================
+#  R53 — kiedy entropia zrowna sie z horyzontem?
+# =============================================================================
+def test_model_a_wieksze_od_wieku_wszechswiata():
+    """Model A (ENTROPIA min-tick): czas do zrownania jest wieksze niz
+    obecny wiek Wszechswiata o dziesiatki rzedow wielkosci."""
+    a = E.czas_do_zrownania_model_a()
+    assert a["t_yr"] > 1e100
+    assert 130 < a["log10_t_yr"] < 140
+
+
+def test_model_b_poincare_wieksze_od_model_a():
+    """Model B (rekurencja Poincarego) jest NIEPOROWNYWALNIE wiekszy od
+    Modelu A - wykladnik dziesietny Modelu B (~1.4e122) jest sam wiekszy
+    niz CALY Model A (~134)."""
+    a = E.czas_do_zrownania_model_a()
+    b = E.czas_do_zrownania_model_b_poincare()
+    assert b["log10_t_yr"] > a["log10_t_yr"] * 1e100    # o wiele wiele wiekszy
+    assert 1e121 < b["log10_t_yr"] < 1e123
+
+
+def test_model_c_smbh_evaporation_rzad_wielkosci():
+    """Model C (odparowanie najwiekszej SMBH) ~ 2.1e100 lat (Page 1976)."""
+    c = E.czas_do_zrownania_model_c_smbh()
+    assert 1e99 < c["t_yr"] < 1e101
+
+
+def test_model_c_mniejszy_od_model_a():
+    """Odparowanie SMBH (Model C) konczy sie wczesniej niz nasz naiwny
+    model min-tick (Model A) osiaga S_dS - bo BH nie wypelniaja horyzontu."""
+    a = E.czas_do_zrownania_model_a()
+    c = E.czas_do_zrownania_model_c_smbh()
+    assert c["t_yr"] < a["t_yr"]
+
+
+def test_figura_53_generuje_plik():
+    """figura_53() zapisuje plik PNG bez bledow."""
+    import os
+    a = E.czas_do_zrownania_model_a()
+    c = E.czas_do_zrownania_model_c_smbh()
+    path = E.figura_53(a, c)
+    assert os.path.exists(path)
