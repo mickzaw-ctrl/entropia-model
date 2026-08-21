@@ -442,6 +442,30 @@ poprawiony):
 - Moduł `entropia/e25.py`, figury figE41–E43, testy test_e25.py (14),
   sekcja 13 manuskryptu.
 
+### R51 — ENTROPIA-6.0: kosmologiczna kalibracja zegara (Λ, zapis pomiaru jako jednostka czasu)
+Rdzeń modelu definiuje Δt_n = κ·ΔS_n, lecz κ było dotąd dowolne (jednostki
+wewnętrzne). R51 wyprowadza κ wyłącznie ze stałych fundamentalnych (ħ, k_B,
+c, G, Λ) — bez dopasowania do danych:
+- **Łańcuch wyprowadzenia**: Λ → horyzont de Sittera R_dS = √(3/Λ) →
+  H_dS = c√(Λ/3) → temperatura Gibbonsa-Hawkinga T_dS = ħH_dS/(2πk_B) →
+  entropia horyzontu S_dS = πR_dS²/(l_P² ln2) [bity] → czas zapisu JEDNEGO
+  bitu (granica Margolus-Levitin) τ_rec = πħ/(2k_B T_dS) = π²/H_dS.
+- **Dla Λ = 1.1056×10⁻⁵² m⁻² (Planck 2018)**: T_dS ≈ 2.21×10⁻³⁰ K,
+  S_dS ≈ 4.71×10¹²² bit, τ_rec ≈ 5.42×10¹⁸ s ≈ **172 mld lat** — DŁUŻEJ
+  niż wiek Wszechświata (13.8 mld lat)!
+- **Interpretacja**: przy czysto kosmologicznym tempie zapisu (T_dS) horyzont
+  de Sittera nie zdążyłby zarejestrować jednego bitu od Wielkiego Wybuchu.
+  Zgodne z R6 (gorący WB jako warunek początkowy): zegar materii tyka
+  lokalnie znacznie szybciej, bo T_lokalna ≫ T_dS.
+- **Test falsyfikacji**: T_CMB/T_dS = 2.72548 K / 2.21×10⁻³⁰ K ≈ 1.23×10³⁰×
+  — zgodne z przewidywaniem R51 (≫10²⁵), potwierdza że struktura Wszechświata
+  wymaga lokalnych temperatur o dziesiątki rzędów wyższych niż T_dS.
+- Wynik stabilny na niepewność Λ: Planck 2018 vs DESI 2024 różnią się < 1%
+  we wszystkich wielkościach (T_dS, S_dS, τ_rec, t_H).
+- κ_cosmo = τ_rec/ln2 ≈ 7.82×10¹⁸ s/nat — fizyczna kalibracja core.py.
+- Moduł `entropia/e26.py`, figura figE44_kalibracja_kosmologiczna, testy
+  test_e26.py (10).
+
 ## Struktura kodu (paczka z testami)
 
 ```
@@ -459,6 +483,7 @@ entropia/
 │   ├── e11.py…e23.py       # ENTROPIA-1.1…3.1 (R18–R46), figury figE1–E36
 │   ├── e24.py              # ENTROPIA-4.0 (R48–R49): dwie komórki, siła, FRW
 │   ├── e25.py              # ENTROPIA-5.0 (R50): pętla pomiarowa IBM/Sycamore
+│   ├── e26.py              # ENTROPIA-6.0 (R51): kalibracja kosmologiczna (Λ)
 │   ├── audyt12.py          # audyt zamykający ENTROPIA-1.2 (świadkowie, figA1–A2)
 │   └── report.py           # budowa raportu (build(), R1–R50)
 ├── tests/                  # pytest (166 testów)
@@ -468,17 +493,19 @@ entropia/
 │   ├── test_e11.py…test_e23.py  # ENTROPIA-1.1…3.1 (118)
 │   ├── test_audyt12.py     # audyt ENTROPIA-1.2 (19)
 │   ├── test_e24.py         # ENTROPIA-4.0 (15)
-│   └── test_e25.py         # ENTROPIA-5.0 / R50 (14)
+│   ├── test_e25.py         # ENTROPIA-5.0 / R50 (14)
+│   └── test_e26.py         # ENTROPIA-6.0 / R51 (10)
 ├── figury/                 # 70+ wykresów PNG (fig1–7, figR*, figE*, figA*)
-└── raport.html             # raport (R1–R50, 5 demo, diagram SVG)
+└── raport.html             # raport (R1–R51, 5 demo, diagram SVG)
 ```
 
 Uruchomienie:
 ```bash
 pip install numpy scipy matplotlib pytest
-python3 -m pytest tests/ -q          # 166 testów
+python3 -m pytest tests/ -q          # 176 testów
 python3 zrob_raport.py               # pełna regeneracja raport.html (~8 min)
 python3 -m entropia.e25              # ENTROPIA-5.0 / R50 (protokół sprzętowy)
+python3 -m entropia.e26              # ENTROPIA-6.0 / R51 (kalibracja kosmologiczna Λ)
 python3 -m entropia.e24              # ENTROPIA-4.0 (R48–R49)
 python3 -m entropia.audyt12          # audyt ENTROPIA-1.2
 ```
