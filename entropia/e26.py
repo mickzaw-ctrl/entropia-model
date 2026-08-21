@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 =============================================================================
-  ENTROPIA-6.0 — KOSMOLOGICZNA KALIBRACJA ZEGARA (R51):
+  ENTROPIA-6.0/6.1 — KOSMOLOGICZNA KALIBRACJA ZEGARA (R51-R52):
                  ZAPIS POMIARU JAKO JEDNOSTKA CZASU
 =============================================================================
   Rdzeń modelu (core.py) definiuje: Δt_n = κ·ΔS_n — czas JEST entropią,
@@ -60,6 +60,36 @@
   największy możliwy rejestr), między którymi musi się zmieścić każda
   fizyczna realizacja „czasu jako zapisu pomiaru”.
 
+  R52 — ILE PROCENT HORYZONTU ZOSTALO JUZ "ZAPISANE"?
+  Skoro S_dS to MAKSYMALNA pojemnosc rejestru (bity), a Wszechswiat MA
+  juz jakas entropie S_now (fotony CMB + materia + czarne dziury), mozna
+  policzyc: jaki procent horyzontu zostal juz zapisany?
+
+    procent = S_now / S_dS × 100%
+
+  Dwa oszacowania S_now z literatury:
+    • TYLKO fotony CMB:  S_now ≈ 2×10⁸⁹ k_B (nats)  → ≈ 2.9×10⁸⁹ bit
+    • Egan & Lineweaver (2010), "A Larger Estimate of the Entropy of the
+      Universe" — zdominowane przez czarne dziury (SMBH):
+      S_now ≈ 3.1×10¹⁰⁴ k_B (nats) → ≈ 4.5×10¹⁰⁴ bit
+
+  WYNIK (R52):
+    procent(CMB tylko)        ≈ 6.1×10⁻³² %
+    procent(Egan-Lineweaver)  ≈ 9.5×10⁻¹⁷ %
+
+  ⇒ Wszechswiat zapisal dotychczas ZNIKOMY fragment (< 10⁻¹⁶ %) swojej
+    maksymalnej pojemnosci pamieci (horyzontu de Sittera). Zgodne z R6/R51:
+    jestesmy naprawde bardzo wczesnie w historii "zegara kosmicznego" —
+    nawet licząc entropie zdominowana przez supermasywne czarne dziury,
+    do zapelnienia horyzontu brakuje ~18 rzedow wielkosci (S_dS/S_now ≈
+    1.05×10¹⁸ dla oszacowania Egana-Lineweavera).
+
+  Uczciwa uwaga: S_now to szacunki rzedu wielkosci z literatury (Egan &
+  Lineweaver 2010), nie pomiar bezposredni — czarne dziury dominuja
+  entropie budzetowa Wszechswiata o ~15 rzedow wielkosci nad fotonami CMB,
+  ale same S_dS (entropia maksymalna horyzontu) jest od nich obu wieksza
+  o kolejne ~18 rzedow wielkosci.
+
   Uruchomienie:  python3 -m entropia.e26
   Wymagania:     numpy, matplotlib
 =============================================================================
@@ -98,6 +128,10 @@ LAMBDA_DESI2024   = 1.0900e-52   # DESI DR2 2024 (LCDM, okolica centralna)
 # Referencyjne dane obserwacyjne do testu falsyfikacji
 T_CMB      = 2.72548        # K, temperatura CMB dziś
 AGE_UNIVERSE_GYR = 13.8      # mld lat, wiek Wszechświata
+
+# R52 — entropia obecna Wszechświata (nats, jednostki k_B) — literatura
+S_NOW_CMB_NATS  = 2.0e89     # tylko fotony CMB (rzad wielkosci)
+S_NOW_EGAN_NATS = 3.1e104    # Egan & Lineweaver 2010 (SMBH-dominowana)
 
 
 def dlugosc_plancka():
@@ -181,6 +215,19 @@ def test_falsyfikacji_temperatury(Lam=LAMBDA_PLANCK2018):
                 zgodne=bool(stosunek > 1e25))
 
 
+
+
+def procent_horyzontu_zapisany(S_now_nats, Lam=LAMBDA_PLANCK2018):
+    """R52 — jaki procent maksymalnej pojemności rejestru (S_dS, bity)
+    zostal juz zapisany, dla podanej obecnej entropii Wszechswiata
+    S_now_nats [nats, jednostki k_B]. Zwraca (S_now_bity, S_dS_bity, procent)."""
+    S_now_bity = S_now_nats / LN2
+    S_dS = entropia_horyzontu_bity(Lam)
+    procent = 100.0 * S_now_bity / S_dS
+    return dict(S_now_bity=S_now_bity, S_dS_bity=S_dS, procent=procent,
+                rzedy_wielkosci_do_zapelnienia=np.log10(S_dS / S_now_bity))
+
+
 def figura_51(wynik_planck, wynik_desi):
     """Wykres: porównanie kluczowych skal czasowych R51 (log)."""
     fig, ax = plt.subplots(figsize=(7.5, 4.8))
@@ -197,6 +244,27 @@ def figura_51(wynik_planck, wynik_desi):
                     textcoords="offset points", xytext=(0, 6), ha="center", fontsize=9)
     fig.tight_layout()
     path = os.path.join(OUT, "figE44_kalibracja_kosmologiczna.png")
+    fig.savefig(path)
+    plt.close(fig)
+    return path
+
+
+
+
+def figura_52(wynik_cmb, wynik_egan):
+    """Wykres: procent zapisanego horyzontu (S_now/S_dS) — dwa oszacowania."""
+    fig, ax = plt.subplots(figsize=(7.5, 4.8))
+    labels = ["fotony CMB\n(S~2e89 nat)", "Egan-Lineweaver\n(SMBH, S~3.1e104 nat)"]
+    vals = [wynik_cmb["procent"], wynik_egan["procent"]]
+    bars = ax.bar(labels, vals, color=["#00d4ff", "#7b2fff"])
+    ax.set_yscale("log")
+    ax.set_ylabel("% zapisanego horyzontu de Sittera (log)")
+    ax.set_title("R52 — Jaki procent maksymalnego rejestru (S_dS) juz zapisano?")
+    for b, v in zip(bars, vals):
+        ax.annotate(f"{v:.2e} %", (b.get_x() + b.get_width() / 2, v),
+                    textcoords="offset points", xytext=(0, 6), ha="center", fontsize=9)
+    fig.tight_layout()
+    path = os.path.join(OUT, "figE45_procent_horyzontu.png")
     fig.savefig(path)
     plt.close(fig)
     return path
@@ -231,11 +299,25 @@ def main():
     print(f"  T_CMB / T_dS = {fals['stosunek']:.4e}×  "
           f"({'ZGODNE' if fals['zgodne'] else 'NIEZGODNE'} z przewidywaniem R51: ≫10²⁵)")
 
+
+    print(f"\n[R52 — ile procent horyzontu de Sittera juz zapisano?]")
+    w_cmb = procent_horyzontu_zapisany(S_NOW_CMB_NATS)
+    w_egan = procent_horyzontu_zapisany(S_NOW_EGAN_NATS)
+    print(f"  S_now (tylko CMB fotony)      = {w_cmb['S_now_bity']:.4e} bit "
+          f"-> {w_cmb['procent']:.4e} % horyzontu")
+    print(f"  S_now (Egan-Lineweaver, SMBH)  = {w_egan['S_now_bity']:.4e} bit "
+          f"-> {w_egan['procent']:.4e} % horyzontu")
+    print(f"  brakuje ~{w_egan['rzedy_wielkosci_do_zapelnienia']:.1f} rzedow "
+          f"wielkosci do zapelnienia horyzontu (wg Egana-Lineweavera)")
+
     w_planck = kalibracja_kosmologiczna(LAMBDA_PLANCK2018)
     w_desi = kalibracja_kosmologiczna(LAMBDA_DESI2024)
     path = figura_51(w_planck, w_desi)
-    print(f"\nFigura: {path}")
-    return dict(planck=w_planck, desi=w_desi, falsyfikacja=fals)
+    path52 = figura_52(w_cmb, w_egan)
+    print(f"\nFigura R51: {path}")
+    print(f"Figura R52: {path52}")
+    return dict(planck=w_planck, desi=w_desi, falsyfikacja=fals,
+                procent_cmb=w_cmb, procent_egan=w_egan)
 
 
 if __name__ == "__main__":
