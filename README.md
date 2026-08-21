@@ -442,7 +442,7 @@ poprawiony):
 - Moduł `entropia/e25.py`, figury figE41–E43, testy test_e25.py (14),
   sekcja 13 manuskryptu.
 
-### R51–R52 — ENTROPIA-6.0/6.1: kosmologiczna kalibracja zegara (Λ, zapis pomiaru jako jednostka czasu)
+### R51–R53 — ENTROPIA-6.0/6.1/6.2: kosmologiczna kalibracja zegara (Λ, zapis pomiaru jako jednostka czasu)
 Rdzeń modelu definiuje Δt_n = κ·ΔS_n, lecz κ było dotąd dowolne (jednostki
 wewnętrzne). R51 wyprowadza κ wyłącznie ze stałych fundamentalnych (ħ, k_B,
 c, G, Λ) — bez dopasowania do danych:
@@ -469,8 +469,16 @@ c, G, Λ) — bez dopasowania do danych:
   **~9.5×10⁻¹⁷%** (Egan-Lineweaver) — Wszechświat zapisał znikomy fragment
   swojej maksymalnej pojemności; brakuje ~18 rzędów wielkości entropii do
   zapełnienia horyzontu, nawet licząc czarne dziury.
-- Moduł `entropia/e26.py`, figury figE44 (R51) i figE45 (R52), testy
-  test_e26.py (14).
+- **R53 — kiedy entropia zrówna się z horyzontem (S_dS)?** Trzy modele:
+  **A** (nasz, naiwne min-tick z R51): t ≈ **8.1×10¹³³ lat** (10^133.9);
+  **B** (Dyson-Kleban-Susskind 2002, rekurencja Poincarego — prawdziwa QFT):
+  t ~ **10^(1.4×10¹²²) lat** — wykładnik ma 123 cyfry, nieporównywalnie
+  większy niż A; **C** (literatura, odparowanie największej SMBH ~10¹¹ M☉,
+  Page 1976): t ≈ **2.1×10¹⁰⁰ lat**. Uczciwa uwaga: nasz własny model
+  (A) zaniża prawdziwą skalę termalizacji (B) o ~10¹²² rzędów wielkości —
+  liniowa akumulacja bitów ≠ pełna dynamika kwantowa próżni de Sittera.
+- Moduł `entropia/e26.py`, figury figE44 (R51), figE45 (R52), figE46 (R53), testy
+  test_e26.py (19).
 
 ## Struktura kodu (paczka z testami)
 
@@ -489,7 +497,7 @@ entropia/
 │   ├── e11.py…e23.py       # ENTROPIA-1.1…3.1 (R18–R46), figury figE1–E36
 │   ├── e24.py              # ENTROPIA-4.0 (R48–R49): dwie komórki, siła, FRW
 │   ├── e25.py              # ENTROPIA-5.0 (R50): pętla pomiarowa IBM/Sycamore
-│   ├── e26.py              # ENTROPIA-6.0/6.1 (R51-R52): kalibracja kosmologiczna (Λ) + % horyzontu
+│   ├── e26.py              # ENTROPIA-6.0/6.1/6.2 (R51-R53): kalibracja kosmologiczna (Λ) + % horyzontu + zrownanie
 │   ├── audyt12.py          # audyt zamykający ENTROPIA-1.2 (świadkowie, figA1–A2)
 │   └── report.py           # budowa raportu (build(), R1–R50)
 ├── tests/                  # pytest (166 testów)
@@ -500,7 +508,7 @@ entropia/
 │   ├── test_audyt12.py     # audyt ENTROPIA-1.2 (19)
 │   ├── test_e24.py         # ENTROPIA-4.0 (15)
 │   ├── test_e25.py         # ENTROPIA-5.0 / R50 (14)
-│   └── test_e26.py         # ENTROPIA-6.0/6.1 / R51-R52 (14)
+│   └── test_e26.py         # ENTROPIA-6.0/6.1/6.2 / R51-R53 (19)
 ├── figury/                 # 70+ wykresów PNG (fig1–7, figR*, figE*, figA*)
 └── raport.html             # raport (R1–R51, 5 demo, diagram SVG)
 ```
@@ -508,7 +516,7 @@ entropia/
 Uruchomienie:
 ```bash
 pip install numpy scipy matplotlib pytest
-python3 -m pytest tests/ -q          # 180 testów
+python3 -m pytest tests/ -q          # 185 testów
 python3 zrob_raport.py               # pełna regeneracja raport.html (~8 min)
 python3 -m entropia.e25              # ENTROPIA-5.0 / R50 (protokół sprzętowy)
 python3 -m entropia.e26              # ENTROPIA-6.0 / R51 (kalibracja kosmologiczna Λ)
