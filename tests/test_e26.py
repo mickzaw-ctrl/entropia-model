@@ -99,3 +99,37 @@ def test_figura_generuje_plik():
     path = E.figura_51(wp, wd)
     import os
     assert os.path.exists(path)
+
+
+# =============================================================================
+#  R52 — procent horyzontu zapisany (S_now vs S_dS)
+# =============================================================================
+def test_procent_horyzontu_cmb_znikomy():
+    """Entropia samych fotonow CMB to znikomy procent S_dS (< 1e-25 %)."""
+    w = E.procent_horyzontu_zapisany(E.S_NOW_CMB_NATS)
+    assert 0 < w["procent"] < 1e-25
+
+
+def test_procent_horyzontu_egan_wiekszy_od_cmb():
+    """Oszacowanie Egana-Lineweavera (SMBH-dominowane) daje wiekszy procent
+    zapisanego horyzontu niz liczenie tylko fotonow CMB, ale wciaz < 1e-10 %."""
+    w_cmb = E.procent_horyzontu_zapisany(E.S_NOW_CMB_NATS)
+    w_egan = E.procent_horyzontu_zapisany(E.S_NOW_EGAN_NATS)
+    assert w_egan["procent"] > w_cmb["procent"]
+    assert 0 < w_egan["procent"] < 1e-10
+
+
+def test_rzedy_wielkosci_do_zapelnienia():
+    """Wedlug oszacowania Egana-Lineweavera brakuje ~18 rzedow wielkosci
+    entropii do zapelnienia horyzontu de Sittera."""
+    w = E.procent_horyzontu_zapisany(E.S_NOW_EGAN_NATS)
+    assert 15 < w["rzedy_wielkosci_do_zapelnienia"] < 21
+
+
+def test_figura_52_generuje_plik():
+    """figura_52() zapisuje plik PNG bez bledow."""
+    import os
+    w_cmb = E.procent_horyzontu_zapisany(E.S_NOW_CMB_NATS)
+    w_egan = E.procent_horyzontu_zapisany(E.S_NOW_EGAN_NATS)
+    path = E.figura_52(w_cmb, w_egan)
+    assert os.path.exists(path)
