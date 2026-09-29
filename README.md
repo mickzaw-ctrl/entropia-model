@@ -442,7 +442,7 @@ poprawiony):
 - Moduł `entropia/e25.py`, figury figE41–E43, testy test_e25.py (14),
   sekcja 13 manuskryptu.
 
-### R51–R53 — ENTROPIA-6.0/6.1/6.2: kosmologiczna kalibracja zegara (Λ, zapis pomiaru jako jednostka czasu)
+### R51–R54 — ENTROPIA-6.0/6.1/6.2: kosmologiczna kalibracja zegara (Λ, zapis pomiaru jako jednostka czasu)
 Rdzeń modelu definiuje Δt_n = κ·ΔS_n, lecz κ było dotąd dowolne (jednostki
 wewnętrzne). R51 wyprowadza κ wyłącznie ze stałych fundamentalnych (ħ, k_B,
 c, G, Λ) — bez dopasowania do danych:
@@ -477,8 +477,12 @@ c, G, Λ) — bez dopasowania do danych:
   Page 1976): t ≈ **2.1×10¹⁰⁰ lat**. Uczciwa uwaga: nasz własny model
   (A) zaniża prawdziwą skalę termalizacji (B) o ~10¹²² rzędów wielkości —
   liniowa akumulacja bitów ≠ pełna dynamika kwantowa próżni de Sittera.
+- **R54 — problem stałej kosmologicznej**: ρ_Planck/ρ_obs ≈ 8.7×10¹²². Tożsamość
+  **Λ·l_P² = 3π/S_dS** (błąd 10⁻¹⁶): małe Λ ≡ ogromna entropia horyzontu
+  (3.3×10¹²² nat). Odcięcie holograficzne odtwarza ρ_Λ (stosunek 1.0). Uczciwie:
+  to **reformulacja, nie rozwiązanie** — Λ pozostaje wejściem modelu.
 - Moduł `entropia/e26.py`, figury figE44 (R51), figE45 (R52), figE46 (R53), testy
-  test_e26.py (19).
+  test_e26.py (22).
 
 ## Struktura kodu (paczka z testami)
 
@@ -497,7 +501,7 @@ entropia/
 │   ├── e11.py…e23.py       # ENTROPIA-1.1…3.1 (R18–R46), figury figE1–E36
 │   ├── e24.py              # ENTROPIA-4.0 (R48–R49): dwie komórki, siła, FRW
 │   ├── e25.py              # ENTROPIA-5.0 (R50): pętla pomiarowa IBM/Sycamore
-│   ├── e26.py              # ENTROPIA-6.0/6.1/6.2 (R51-R53): kalibracja kosmologiczna (Λ) + % horyzontu + zrownanie
+│   ├── e26.py              # ENTROPIA-6.0/6.1/6.2 (R51-R54): kalibracja kosmologiczna (Λ) + % horyzontu + zrownanie
 │   ├── audyt12.py          # audyt zamykający ENTROPIA-1.2 (świadkowie, figA1–A2)
 │   └── report.py           # budowa raportu (build(), R1–R50)
 ├── tests/                  # pytest (166 testów)
@@ -516,7 +520,7 @@ entropia/
 Uruchomienie:
 ```bash
 pip install numpy scipy matplotlib pytest
-python3 -m pytest tests/ -q          # 185 testów
+python3 -m pytest tests/ -q          # 188 testów
 python3 zrob_raport.py               # pełna regeneracja raport.html (~8 min)
 python3 -m entropia.e25              # ENTROPIA-5.0 / R50 (protokół sprzętowy)
 python3 -m entropia.e26              # ENTROPIA-6.0 / R51 (kalibracja kosmologiczna Λ)
