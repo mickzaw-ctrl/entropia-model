@@ -370,7 +370,66 @@ Moduł `entropia/e25.py`, figury figE41–E43, testy test_e25.py (14).
 
 ---
 
-## Dodatek A — Synteza rozszerzeń R1–R50
+## 14. ENTROPIA-6.0 — kalibracja kosmologiczna zegara (R51–R54)
+
+Dotychczas współczynnik κ w Δt_n = κ·ΔS_n był dowolny (jednostki wewnętrzne).
+Sekcja 14 wyprowadza go wyłącznie ze stałych fundamentalnych (ħ, k_B, c, G) i
+stałej kosmologicznej Λ, bez dopasowania do danych. Moduł: `entropia/e26.py`,
+testy: `tests/test_e26.py` (22).
+
+### 14.1. Kalibracja z Λ (R51)
+
+Łańcuch: Λ → R_dS = √(3/Λ) → H_dS = c√(Λ/3) → T_dS = ħH_dS/(2πk_B) →
+S_dS = πR_dS²/(l_P²·ln 2) [bity] → czas zapisu jednego bitu przy T_dS
+(granica Margolusa–Levitina) τ_rec = πħ/(2k_B T_dS).
+
+Dla Λ = 1.1056×10⁻⁵² m⁻² (Planck 2018): T_dS = 2.212×10⁻³⁰ K,
+S_dS = 4.708×10¹²² bit, τ_rec = 5.423×10¹⁸ s = 172 mld lat, czyli 12.5× więcej
+niż wiek Wszechświata. Stąd κ_cosmo = τ_rec/ln 2 = 7.82×10¹⁸ s/nat.
+Dla Λ z DESI 2024 wyniki różnią się o mniej niż 5% (τ_rec = 173.1 mld lat).
+
+**Test falsyfikacji:** T_CMB/T_dS = 1.23×10³⁰ ≫ 10²⁵. Materia „tyka” lokalnie
+o wiele szybciej niż horyzont, co jest zgodne z obserwowaną strukturą.
+
+### 14.2. Ile horyzontu zostało zapisane (R52)
+
+Przy S_now/S_dS: dla samych fotonów CMB (≈2×10⁸⁹ nat) wychodzi 6.1×10⁻³² %;
+dla oszacowania Egana i Lineweavera (2010, ≈3.1×10¹⁰⁴ nat, zdominowane przez
+czarne dziury) 9.5×10⁻¹⁷ %. Do zapełnienia rejestru brakuje ~18 rzędów
+wielkości. To szacunki rzędu wielkości z literatury, nie pomiary.
+
+### 14.3. Kiedy entropia zrówna się z horyzontem (R53)
+
+| model | założenie | czas |
+|---|---|---|
+| A (ENTROPIA, min-tick) | każdy bit kosztuje ≥ τ_rec | 8.09×10¹³³ lat |
+| B (Dyson–Kleban–Susskind 2002) | rekurencja Poincarégo, t ~ exp(S_dS) | ~10^(1.4×10¹²²) lat |
+| C (Page 1976) | odparowanie największej SMBH (~10¹¹ M☉) | 2.1×10¹⁰⁰ lat |
+
+**Uczciwa uwaga:** model A zaniża prawdziwą skalę termalizacji (B) o ~10¹²²
+rzędów wielkości, bo liczy liniową akumulację bitów, a nie dynamikę kwantowych
+fluktuacji próżni de Sittera. Model C nie osiąga S_dS, bo entropia
+promieniowania z odparowanych czarnych dziur jest znacznie mniejsza od S_dS.
+
+### 14.4. Problem stałej kosmologicznej (R54)
+
+Naiwna gęstość próżni z odcięciem Plancka jest ρ_Pl/ρ_obs ≈ 8.7×10¹²² razy
+większa od obserwowanej. Model daje tożsamość geometryczną
+
+  **Λ·l_P² = 3π / S_dS** (S_dS w nat; zgodność do 10⁻¹⁶),
+
+czyli małe Λ w jednostkach Plancka jest odwrotnością entropii horyzontu.
+Odcięcie holograficzne z L = R_dS odtwarza ρ_Λ (stosunek 1.000), ale przez
+konstrukcję.
+
+**To reformulacja, nie rozwiązanie.** Problem „dlaczego energia próżni jest
+mała” sprowadza się do „dlaczego S_dS ≈ 10¹²²”. Model przyjmuje Λ jako wejście,
+niczego nie przewiduje z pierwszych zasad i nie wyjaśnia, dlaczego wkłady QFT
+się znoszą, tylko to omija.
+
+---
+
+## Dodatek A — Synteza rozszerzeń R1–R54
 
 | # | rozszerzenie | kluczowy wynik |
 |---|---|---|
@@ -423,6 +482,10 @@ Moduł `entropia/e25.py`, figury figE41–E43, testy test_e25.py (14).
 | R48 | ENTROPIA-4.0 — dwie komórki (NESS) | S_tot∞=1.3491; J_E,∞=0.00507; σ_NESS=0.00338 = J·(1/T_B−1/T_A) (Clausius, Δ=1e-6); Fouriera: J↑ΔT (nasycenie); produkcja → zimna komórka |
 | R49 | ENTROPIA-4.0 — siła + FRW | S∞(κ): 1.2617→1.3546 ⇒ F(d)<0 (przyciąganie, nie 1/d²); inwersja→T=∞ (Wielki Wybuch): a: 0→1.2374→1 (odbicie); H: +∞→0; τ_sys=1.3491 (skończony), τ_bud liniowy; σ_A/σ_B≈22→0.034 (dylatacja) |
 | R50 | ENTROPIA-5.0 — pętla pomiarowa (IBM/Sycamore) | POPRAWKA: h,cx,x daje Ψ+ (jasny!), trzeba h,cx,z,x → Ψ−; P_D: kolektywna 1.000000 vs niezależna e^{−γt} (falsyfikacja); |T0⟩: e^{−2γt} (superradiancja); rz odblokowuje; obwód z ancillą ≡ Kraus (Δ=0); F(rekonstr.)=0.9669; Heron 3–9, Willow 2–5 kroków |
+| R51 | ENTROPIA-6.0 — kalibracja z Λ | T_dS=2.21e-30 K; S_dS=4.71e122 bit; τ_rec=172 mld lat (12.5× wiek); κ_cosmo=7.82e18 s/nat; T_CMB/T_dS=1.2e30 |
+| R52 | Procent zapisanego horyzontu | CMB: 6.1e-32 %; Egan–Lineweaver: 9.5e-17 %; brakuje ~18 rzędów |
+| R53 | Zrównanie entropii z horyzontem | A: 8.1e133 lat; B (Poincaré): ~10^(1.4e122) lat; C (SMBH): 2.1e100 lat; model A zaniża B o ~10^122 rzędów |
+| R54 | Problem stałej kosmologicznej | ρ_Pl/ρ_obs=8.7e122; Λ·l_P²=3π/S_dS (Δ=1e-16); reformulacja, nie rozwiązanie |
 
 ## Dodatek B — Bibliografia (wybór)
 
@@ -440,6 +503,11 @@ Moduł `entropia/e25.py`, figury figE41–E43, testy test_e25.py (14).
 12. Abdo A.A. et al., *Nature* 462, 331 (2009); Vasileiou V. et al., *PRD* 87, 122001 (2013) — GRB/LIV.
 13. Hopkins P.F., Beacom J.F., *ApJ* 651, 142 (2006); Madau P., Dickinson M., *ARAA* 52, 415 (2014) — kosmiczne SFRD.
 14. Planck Collaboration (2020), *A&A* 641, A6 — parametry ΛCDM (H₀, Ωm, ΩΛ) użyte w R38.
+15. Gibbons G.W., Hawking S.W., *Phys. Rev. D* 15, 2738 (1977) — temperatura i entropia horyzontu de Sittera.
+16. Margolus N., Levitin L.B., *Physica D* 120, 188 (1998) — kwantowa granica prędkości obliczeń.
+17. Dyson L., Kleban M., Susskind L., *JHEP* 0210:011 (2002) — rekurencja Poincarégo w przestrzeni de Sittera.
+18. Page D.N., *Phys. Rev. D* 13, 198 (1976) — czas parowania czarnych dziur.
+19. Cohen A.G., Kaplan D.B., Nelson A.E., *PRL* 82, 4971 (1999) — odcięcie holograficzne a energia próżni.
 
 ---
 
