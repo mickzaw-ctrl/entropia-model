@@ -177,3 +177,24 @@ def test_figura_53_generuje_plik():
     c = E.czas_do_zrownania_model_c_smbh()
     path = E.figura_53(a, c)
     assert os.path.exists(path)
+
+
+# =============================================================================
+#  R54 - problem stalej kosmologicznej
+# =============================================================================
+def test_tozsamosc_lambda_entropia():
+    """Λ·l_P² = 3π/S_dS (S w nat) - dokladna tozsamosc geometryczna."""
+    p = E.problem_stalej_kosmologicznej()
+    assert abs(p["Lam_lP2"] - p["trzy_pi_przez_S"]) / p["Lam_lP2"] < 1e-9
+
+
+def test_stosunek_gestosci_prozni():
+    """Naiwny stosunek rho_Planck/rho_obs jest rzedu 1e122-1e123."""
+    p = E.problem_stalej_kosmologicznej()
+    assert 1e121 < p["stosunek"] < 1e124
+
+
+def test_odciecie_holograficzne_odtwarza_obserwacje():
+    """Cutoff holograficzny z L=R_dS daje rho_obs (przez konstrukcje)."""
+    p = E.problem_stalej_kosmologicznej()
+    assert abs(p["rho_holo_do_obs"] - 1.0) < 1e-9
