@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 =============================================================================
-  ENTROPIA-6.0/6.1/6.2 — KOSMOLOGICZNA KALIBRACJA ZEGARA (R51-R53):
+  ENTROPIA-6.0..6.3 — KOSMOLOGICZNA KALIBRACJA ZEGARA (R51-R54):
                  ZAPIS POMIARU JAKO JEDNOSTKA CZASU
 =============================================================================
   Rdzeń modelu (core.py) definiuje: Δt_n = κ·ΔS_n — czas JEST entropią,
@@ -125,6 +125,27 @@
     czas relaksacji o ~10¹²² rzedow wielkosci, bo liczy tylko LINIOWA
     akumulacje bitow w najwolniejszym tempie, a nie PRAWDZIWA dynamike
     kwantowych fluktuacji vacuum de Sittera.
+
+  R54 — PROBLEM STALEJ KOSMOLOGICZNEJ: CO ENTROPIA DAJE, A CZEGO NIE
+  Problem: naiwna gestosc prozni z odcieciem Plancka ρ_Pl = ħc/l_P⁴ jest
+  ~8.7×10¹²² razy wieksza niz obserwowana ρ_Λ = Λc⁴/(8πG) (klasycznie
+  "10¹²⁰", zaleznie od odciecia i konwencji).
+
+  WYNIK (tozsamosc, sprawdzona numerycznie):
+      Λ·l_P² = 3π / S_dS      (S_dS w nat)         [zgodne do 1e-16]
+  czyli mala wartosc Λ w jednostkach Plancka JEST odwrotnoscia calkowitej
+  entropii horyzontu: "dlaczego Λ jest tak male?" ≡ "dlaczego horyzont
+  ma tak wielka entropie, 3.3×10¹²² nat?".
+  Ta sama liczba wyznacza tez: T_dS, τ_rec (R51) i pojemnosc rejestru.
+  Odciecie holograficzne (Cohen-Kaplan-Nelson) ρ ~ 3c⁴/(8πG·R_dS²)
+  odtwarza ρ_Λ dokladnie (stosunek 1.0) - ale przez konstrukcje.
+
+  UCZCIWA UWAGA: to REFORMULACJA, nie ROZWIAZANIE. Sprowadza problem
+  z "dlaczego energia prozni jest mala" do "dlaczego S_dS ~ 10¹²²",
+  bez przewidzenia wartosci Λ z pierwszych zasad. ENTROPIA nie wyprowadza
+  Λ; przyjmuje je jako wejscie (R51). Nie ma tu nowej fizyki, ktora
+  ustalilaby S_dS. Model nie zmienia tez problemu doboru dokladnego
+  (dlaczego wklady QFT sie znosza) - omija go przez cutoff holograficzny.
 
   Uruchomienie:  python3 -m entropia.e26
   Wymagania:     numpy, matplotlib
@@ -300,6 +321,20 @@ def czas_do_zrownania_model_c_smbh():
 
 
 
+def problem_stalej_kosmologicznej(Lam=LAMBDA_PLANCK2018):
+    """R54 - stosunek naiwnej gestosci prozni (odciecie Plancka) do
+    obserwowanej oraz tozsamosc Λ·l_P² = 3π/S_dS (S_dS w nat)."""
+    lP = dlugosc_plancka()
+    S_nat = entropia_horyzontu_bity(Lam) * LN2
+    rho_obs = Lam * C**4 / (8 * np.pi * G)
+    rho_pl = HBAR * C / lP**4
+    rho_holo = 3 * C**4 / (8 * np.pi * G) / (3.0 / Lam)
+    return dict(rho_obs=rho_obs, rho_planck=rho_pl,
+                stosunek=rho_pl / rho_obs,
+                Lam_lP2=Lam * lP**2, trzy_pi_przez_S=3 * np.pi / S_nat,
+                rho_holo_do_obs=rho_holo / rho_obs, S_dS_nats=S_nat)
+
+
 def figura_51(wynik_planck, wynik_desi):
     """Wykres: porównanie kluczowych skal czasowych R51 (log)."""
     fig, ax = plt.subplots(figsize=(7.5, 4.8))
@@ -418,6 +453,15 @@ def main():
           f"{c['t_yr']:.3e} lat  (10^{c['log10_t_yr']:.1f})")
     print(f"  Model A / wiek dzis (13.8 mld lat): 10^{a['log10_t_yr']-10.14:.1f}x")
 
+
+    print(f"\n[R54 - problem stalej kosmologicznej]")
+    p = problem_stalej_kosmologicznej()
+    print(f"  rho_Planck / rho_obs        = {p['stosunek']:.3e}")
+    print(f"  Λ·l_P²                       = {p['Lam_lP2']:.6e}")
+    print(f"  3π / S_dS                    = {p['trzy_pi_przez_S']:.6e}  (tozsamosc)")
+    print(f"  rho_holo(R_dS) / rho_obs     = {p['rho_holo_do_obs']:.6f}")
+    print("  UWAGA: reformulacja (Λ ~ 1/S_dS), nie rozwiazanie.")
+
     w_planck = kalibracja_kosmologiczna(LAMBDA_PLANCK2018)
     w_desi = kalibracja_kosmologiczna(LAMBDA_DESI2024)
     path = figura_51(w_planck, w_desi)
@@ -428,7 +472,8 @@ def main():
     print(f"Figura R53: {path53}")
     return dict(planck=w_planck, desi=w_desi, falsyfikacja=fals,
                 procent_cmb=w_cmb, procent_egan=w_egan,
-                zrownanie_a=a, zrownanie_b=b, zrownanie_c=c)
+                zrownanie_a=a, zrownanie_b=b, zrownanie_c=c,
+                stala_kosm=p)
 
 
 if __name__ == "__main__":
